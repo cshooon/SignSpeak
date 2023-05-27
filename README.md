@@ -144,4 +144,6 @@ ASLRecognitionScreen.update_prediction_label(self.asl_screen, predicted_char)
 print(f'Predicted ASL Alphabet: {predicted_char}')
 ```
 ## Future Enhancements
-I couldn't deploy because depolyment to ios requires macos. (I'm using window 😞😞) During summer vacation I'll try to deploy with android. I've tried to imporve trained model well fitted using pretained model in tensorflow. Despite my effort, my computer RAM can't afford it. :cry::cry::upside_down_face: During summer vacation I'll try with my future new computer. 🙂:smile:
+I couldn't deploy because depolyment to ios requires macos. (I'm using window 😞😞) During summer vacation I'll try to deploy with android. I've tried to improve trained model to be well fitted using pretained model in tensorflow. Despite my effort, my computer RAM can't afford it. :cry::cry::upside_down_face: 
+
+During summer vacation I'll try with my future new computer. 🙂:smile:
