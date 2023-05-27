@@ -2,7 +2,7 @@
 
 ## Project Description
 
-"Sign Speak" is an educational software developed using Kivy, a Python library for developing multitouch applications. It's a modern and engaging way to learn sign language, offering different interactive modes to enrich the learning experience. The project aims to make sign language more accessible to everyone and promote its learning and usage.
+"Sign Speak" is an educational software developed using Kivy, a Python library for developing applications. It's a modern and engaging way to learn sign language, offering different interactive modes to enrich the learning experience. The project aims to make sign language more accessible to everyone and promote its learning and usage.
 
 ## Features
 
