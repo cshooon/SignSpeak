@@ -52,3 +52,96 @@ Also, download the required NLTK data:
 import nltk
 nltk.download('brown')
 ```
+
+## Troubleshooting
+1. hand tracking(find hand)
+This class, `handTracker`, is responsible for detecting and tracking hands in an image using the MediaPipe library. There are its two methods.
+
+    1. **`handsFinder`**: This method detects the hand landmarks in the given image. 
+
+    2. **`positionFinder`**: This method returns a list of all hand landmarks, with each landmark being a list of its ID and its x and y coordinates.
+    
+```python
+class handTracker():
+    def __init__(self, mode=False, maxHands=2, detectionCon=0.5, modelComplexity=1, trackCon=0.5):
+        self.mode = mode
+        self.maxHands = maxHands
+        self.detectionCon = detectionCon
+        self.modelComplex = modelComplexity
+        self.trackCon = trackCon
+        self.mpHands = mp.solutions.hands
+        self.hands = self.mpHands.Hands(self.mode, self.maxHands,self.modelComplex,
+                                        self.detectionCon, self.trackCon)
+        self.mpDraw = mp.solutions.drawing_utils
+
+    def handsFinder(self, image, draw=True):
+        imageRGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        self.results = self.hands.process(imageRGB)
+
+        if self.results.multi_hand_landmarks:
+            for handLms in self.results.multi_hand_landmarks:
+
+                if draw:
+                    self.mpDraw.draw_landmarks(image, handLms, self.mpHands.HAND_CONNECTIONS)
+        return image
+
+    def positionFinder(self, image, handNo=0, draw=True):
+        lmlist = []
+        if self.results.multi_hand_landmarks:
+            Hand = self.results.multi_hand_landmarks[handNo]
+            for id, lm in enumerate(Hand.landmark):
+                h, w, c = image.shape
+                cx, cy = int(lm.x * w), int(lm.y * h)
+                lmlist.append([id, cx, cy])
+            if draw:
+                cv2.circle(image, (cx, cy), 15, (255, 0, 255), cv2.FILLED)
+
+        return lmlist
+```
+2. convert sign language to Alphabet
+
+     1. **`Hand Region Isolation`**: The wrist and middle finger's coordinates are used as an approximate bounding box for the hand.
+
+    2. **`Hand Region Preprocessing`**: The isolated hand region is then preprocessed to match the requirements of  model. The image is resized to a fixed size (64x64 pixels) which is the input size expected by the model. It's then normalized (all pixel values divided by 255) to bring all pixel intensities within the range [0, 1]. The normalized image is then expanded along a new axis to match the model's expected input shape.
+
+    3. **`Alphabet Prediction`**: Lastly put the preprocessed hand image into the trained model, which then predicts the ASL (American Sign Language) alphabet corresponding to the hand posture. The model's output is a vector of probabilities corresponding to each potential alphabet. The alphabet with the highest probability is selected as the predicted output.
+
+```python
+# Get the wrist and middle fingertip landmarks
+wrist_x, wrist_y = lmList[0][1], lmList[0][2]  # Wrist is landmark 0
+mid_tip_x, mid_tip_y = lmList[12][1], lmList[12][2]  # Middle finger tip is landmark 12
+
+# Define the bounding box with padding
+p = 20
+x_min, y_min = max(0, min(wrist_x, mid_tip_x) - p), max(0, min(wrist_y, mid_tip_y) - p)
+x_max, y_max = min(frame.shape[1], max(wrist_x, mid_tip_x) + p), min(frame.shape[0],
+                                                                     max(wrist_y, mid_tip_y) + p)
+
+# Crop the hand region from the frame
+hand_img = frame[y_min:y_max, x_min:x_max]
+if hand_img.size == 0:
+    return
+
+# Resize the hand image to (64, 64)
+hand_img = cv2.resize(hand_img, (64, 64))
+
+# Preprocess the hand image
+hand_img = hand_img.astype('float32') / 255.0
+
+# Add an extra dimension
+hand_img = np.expand_dims(hand_img, axis=0)
+
+# Predict the ASL alphabet
+pred = self.model.predict(hand_img)
+pred_class = np.argmax(pred, axis=1)
+
+asl_alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+                'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+                'del', 'nothing', 'space']
+predicted_char = asl_alphabet[pred_class[0]]
+
+ASLRecognitionScreen.update_prediction_label(self.asl_screen, predicted_char)
+print(f'Predicted ASL Alphabet: {predicted_char}')
+```
+## Future Enhancements
+I couldn't deploy because depolyment to ios requires macos. (I'm using window 😞😞) During summer vacation I'll try to deploy with android. I've tried to imporve trained model well fitted using pretained model in tensorflow. Despite my effort, my computer RAM can't afford it. :cry::cry::upside_down_face: During summer vacation I'll try with my future new computer. 🙂:smile:
